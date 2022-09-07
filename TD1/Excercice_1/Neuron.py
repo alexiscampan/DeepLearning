@@ -8,6 +8,7 @@ def sum_network(l):
     result = 0
     for val in l:
         result += val
+    return result
 
 
 def relu(val):
@@ -30,6 +31,8 @@ class Neuron(Abs_Neuron):
         self.value = value
         self.layer_n = layer_n
         self.node_n = node_n
+        self.s_in: List[Abs_Synapse] = []
+        self.s_out: List[Abs_Synapse] = []
         self.fn_aggr = fn_aggr
         self.fn_act = fn_act
 
@@ -39,16 +42,17 @@ class Neuron(Abs_Neuron):
     def get_value(self):
         return self.value
 
-    # TODO is typing correct ?
-    def add_synapses_in(self, s_in: List[Abs_Synapse]) -> None:
-        self.synapses_in = s_in
+    def add_synapse_in(self, synapse: Abs_Synapse) -> None:
+        self.s_in.append(synapse)
 
-    def add_synapses_out(self, s_out: List[Abs_Synapse]) -> None:
-        self.synapses_out = s_out
+    def add_synapse_out(self, synapse: Abs_Synapse) -> None:
+        self.s_out.append(synapse)
 
     def aggregate(self):
         self.res = []
-        for synapse in self.synapses_in:
+        # When the node is the output node to some connections,
+        # calculate each activation value : in_node value * w
+        for synapse in self.s_out:
             n = synapse.get_neuron_in()
             pre_activation = n.get_value() * synapse.get_weight()
             self.res.append(pre_activation)
@@ -58,3 +62,4 @@ class Neuron(Abs_Neuron):
         aggregation = self.fn_aggr(self.res)
         self.fn_act(aggregation)
         self.value = aggregation  # Update the value
+        return aggregation
