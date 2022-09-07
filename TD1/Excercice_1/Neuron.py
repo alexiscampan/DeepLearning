@@ -1,6 +1,7 @@
 
 import Synapse
 
+
 def sum_network(l):
     result = 0
     for val in l:
@@ -27,8 +28,8 @@ class Neuron:
 
     def add_synapses_in(self, s_in) -> None:
         self.synapses_in = s_in
-    
-    def add_synapses_out(self, s_out) -> None : 
+
+    def add_synapses_out(self, s_out) -> None:
         self.synapses_out = s_out
 
     def aggregate(self):
@@ -42,5 +43,4 @@ class Neuron:
         self.aggregate()
         aggregation = self.fn_aggr(self.res)
         self.fn_act(aggregation)
-        self.value = aggregation # Update the value
-
+        self.value = aggregation  # Update the value
