@@ -27,8 +27,17 @@ class Synapse:
     def get_neuron_in(self):
         return self.n_in
 
-    def get_reuron_out(self):
+    def get_neuron_out(self):
         return self.n_out
 
     def get_weight(self):
         return self.weight
+
+    def backward(self, c):
+        lr = 0.001
+        xi = self.n_in.value
+        difference = c - self.n_out.value
+        print(difference)
+        if (difference != 0):
+            print(f"backward difference {difference}")
+            self.weight = self.weight + lr * difference * xi

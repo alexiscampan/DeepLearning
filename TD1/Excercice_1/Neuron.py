@@ -13,7 +13,7 @@ def sum_network(l):
 
 def relu(val):
     if val > 0:
-        return 1
+        return val
     else:
         return 0
 
@@ -35,6 +35,7 @@ class Neuron(Abs_Neuron):
         self.s_out: List[Abs_Synapse] = []
         self.fn_aggr = fn_aggr
         self.fn_act = fn_act
+        self.to_update = True  # on veut pas update la première couche, où to_update sera False
 
     def __str__(self):
         return f"Neuron{self.layer_n}{self.node_n}({self.value})"
@@ -57,9 +58,10 @@ class Neuron(Abs_Neuron):
             pre_activation = n.get_value() * synapse.get_weight()
             self.res.append(pre_activation)
 
-    def activate(self):
+    def forward(self):
         self.aggregate()
         aggregation = self.fn_aggr(self.res)
+        print("Aggregation in node: ", self.res)
         self.fn_act(aggregation)
         self.value = aggregation  # Update the value
         return aggregation

@@ -2,25 +2,29 @@
 from typing import List
 
 import pandas as pd
-
+import random
 from Abstract_Neuron import Abs_Neuron
 from Abstract_Synapse import Abs_Synapse
 from Neuron import Neuron
 from Synapse import Synapse
 
-#%%
-toy = [[1, 1, 1], [0, 0, 0]]
-y = [1, 1]
+# %%
+toy = [[1, 1, 1], [1, 0, 0], [0, 0, 0]]
+y = [1, 1, 0]
 X = pd.DataFrame(toy)
 # %%
+
+
 class MutiLayerPerceptron:
     def __init__(self, X, layers: List) -> None:
         self.n0_nodes = X.shape[1]  # columns are also nodes
         self.layers = layers.copy()
+        self.X = X
         self.layers.insert(0, self.n0_nodes)
         self.create_neurons()
         self.create_synapses()
-        print(f"# SUMMARY : MultiLayerPercetron with architecture : {self.layers}")
+        print(
+            f"# SUMMARY : MultiLayerPercetron with architecture : {self.layers}")
 
     def create_neurons(self):
         self.NEURONS: List[List[Abs_Neuron]] = []
@@ -28,8 +32,8 @@ class MutiLayerPerceptron:
             assert n_neurons > 0
             neurons_in: List[Abs_Neuron] = []
             for i in range(n_neurons):
-                rnd = 1
-                neurons_in.append(Neuron(rnd, index, i))
+                rnd = random.randint(-1, 1)
+                neurons_in.append(Neuron(random.uniform(-1, 1), index, i))
 
             self.NEURONS.append(neurons_in)
 
@@ -47,7 +51,7 @@ class MutiLayerPerceptron:
                 # Neuron1 => connect to all out_layer-1
                 for in_node in layer_minus_1:
                     # create the synapse
-                    w = 0.5
+                    w = random.uniform(-1, 1)
                     synapse = Synapse(w)
 
                     # Add neuron reference to synapse
@@ -88,26 +92,59 @@ class MutiLayerPerceptron:
             print("\n")
             print(f"Connected Neurons layer {index}")
             [
-                print("Node is in for  " + synapse.__str__())
+                print("Node " + synapse.get_neuron_in().__str__() +
+                      "is in for  " + synapse.__str__())
                 for neuron in layer
                 for synapse in neuron.s_in
             ]
 
             [
-                print("Node is out for " + synapse.__str__())
+                print("Node " + synapse.get_neuron_out().__str__() +
+                      "is out for " + synapse.__str__())
                 for neuron in layer
                 for synapse in neuron.s_out
             ]
 
+    def forward(self):
+        for layer in self.NEURONS[1:]:
+            for node in layer:
+                node.forward()
+
+        return self.NEURONS[-1][0].value
+
+    def backward(self, pred):
+        for layer in self.SYNAPSES:
+            for synapse in layer:
+                synapse.backward(pred)
+
+    def train(self, epochs=10, X=X, y=[1]):
+
+        for epoch in range(epochs):
+            for line in X.iterrows():
+                # init first layer:
+                for neuron_index, neuron in enumerate(self.NEURONS[0]):
+                    neuron.value = line[1][neuron_index]
+
+                [print(i.value) for i in self.NEURONS[0]]
+
+                pred = self.forward()
+                print(
+                    f"Epoch {epoch}. line : {line[0]} Pred : {pred}  Target : {y[0]}")
+                self.backward(pred)
+
 
 # %%
-
 mlp = MutiLayerPerceptron(X, [2, 2, 1])
 mlp.prove_synapses()
 
-#%%
+# %%
 mlp.prove_neurons()
 
-#%%
+# %%
 # train this thing
-mlp.NEURONS[0][0].activate()
+
+# %%
+
+mlp.train()
+
+# %%
