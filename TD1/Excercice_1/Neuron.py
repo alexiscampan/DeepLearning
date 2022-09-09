@@ -1,10 +1,14 @@
+from typing import List
 
-import Synapse
+from Abstract_Neuron import Abs_Neuron
+from Abstract_Synapse import Abs_Synapse
+
 
 def sum_network(l):
     result = 0
     for val in l:
         result += val
+    return result
 
 
 def relu(val):
@@ -15,32 +19,47 @@ def relu(val):
 
 
 """
-Synapse contenant le poids synaptique et le neurone entrant et le sortant
+Neuron 
 """
 
 
-class Neuron:
-    def __init__(self, value, fn_aggr=sum_network, fn_act=relu) -> None:  # TODO
+class Neuron(Abs_Neuron):
+    def __init__(
+        self, value, layer_n: int, node_n: int, fn_aggr=sum_network, fn_act=relu
+    ) -> None:  # TODO
+        super()
         self.value = value
+        self.layer_n = layer_n
+        self.node_n = node_n
+        self.s_in: List[Abs_Synapse] = []
+        self.s_out: List[Abs_Synapse] = []
         self.fn_aggr = fn_aggr
         self.fn_act = fn_act
 
-    def add_synapses_in(self, s_in) -> None:
-        self.synapses_in = s_in
-    
-    def add_synapses_out(self, s_out) -> None : 
-        self.synapses_out = s_out
+    def __str__(self):
+        return f"Neuron{self.layer_n}{self.node_n}({self.value})"
+
+    def get_value(self):
+        return self.value
+
+    def add_synapse_in(self, synapse: Abs_Synapse) -> None:
+        self.s_in.append(synapse)
+
+    def add_synapse_out(self, synapse: Abs_Synapse) -> None:
+        self.s_out.append(synapse)
 
     def aggregate(self):
         self.res = []
-        for synapse in self.synapses_in:
-            n = synapse.get_neuron()
+        # When the node is the output node to some connections,
+        # calculate each activation value : in_node value * w
+        for synapse in self.s_out:
+            n = synapse.get_neuron_in()
             pre_activation = n.get_value() * synapse.get_weight()
-            self.resres.append(pre_activation)
+            self.res.append(pre_activation)
 
     def activate(self):
         self.aggregate()
         aggregation = self.fn_aggr(self.res)
         self.fn_act(aggregation)
-        self.value = aggregation # Update the value
-
+        self.value = aggregation  # Update the value
+        return aggregation
