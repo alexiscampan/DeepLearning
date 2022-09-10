@@ -129,14 +129,14 @@ class MutiLayerPerceptron:
             print(f"Connected Neurons layer {index}")
             [
                 print("Node " + synapse.get_neuron_in().__str__() +
-                      "is in for  " + synapse.__str__())
+                      " is in for  " + synapse.__str__())
                 for neuron in layer
                 for synapse in neuron.s_in
             ]
 
             [
                 print("Node " + synapse.get_neuron_out().__str__() +
-                      "is out for " + synapse.__str__())
+                      " is out for " + synapse.__str__())
                 for neuron in layer
                 for synapse in neuron.s_out
             ]
@@ -189,6 +189,13 @@ class MutiLayerPerceptron:
                 if to_update != 0:
                     self.backward(to_update)
                 loss.append(to_update)
+
+            # print mean abs loss
+            abs_loss = np.array(np.abs(loss)).mean()
+            print(f"Absolute Loss {abs_loss}")
+            print("\n")
+            if abs_loss == 0:
+                break
             LOSS.append(loss)
         return LOSS
 
@@ -204,7 +211,6 @@ mlp.prove_neurons()
 # train this thing
 
 # %%
-
-l = mlp.train()
+l = mlp.train(epochs=20)
 
 # %%

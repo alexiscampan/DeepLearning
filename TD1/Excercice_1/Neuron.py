@@ -79,7 +79,7 @@ class Neuron(Abs_Neuron):
     def __str__(self) -> None:
         """ print method
         """
-        return f"Neuron{self.layer_n}{self.node_n}({self.value})"
+        return f"Neuron{self.layer_n}{self.node_n}({round(self.value,1)})"
 
     def get_value(self) -> float:
         """ Getter for the value
