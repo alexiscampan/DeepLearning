@@ -1,4 +1,3 @@
-# %%
 from typing import List
 import numpy as np
 import pandas as pd
@@ -7,28 +6,6 @@ from Abstract_Neuron import Abs_Neuron
 from Abstract_Synapse import Abs_Synapse
 from Neuron import Neuron, heavy
 from Synapse import Synapse
-
-
-# %%
-# a, b, c
-# fn => (a and b) or c
-toy = [[1, 1, 1],  # true
-       [1, 0, 0],  # false
-       [0, 0, 0],  # false
-       [1, 0, 1],  # false
-       [1, 1, 0],  # true
-       [0, 0, 1]  # true
-       ]
-y = [
-    1,
-    0,
-    0,
-    0,
-    1,
-    1
-]
-X = pd.DataFrame(toy)
-# %%
 
 
 class MutiLayerPerceptron:
@@ -77,7 +54,6 @@ class MutiLayerPerceptron:
         for index, out_layer in enumerate(self.NEURONS[slice(1, len(self.NEURONS))]):
             Synapses_li_to_li_plus_1 = []
             layer_minus_1 = self.NEURONS[index]
-            print(layer_minus_1)
             # out layer [Neuron1, Neuron2, Neuron3]
             for out_node in out_layer:
                 # Neuron1 => connect to all out_layer-1
@@ -163,7 +139,7 @@ class MutiLayerPerceptron:
             for synapse in layer:
                 synapse.backward(update)
 
-    def train(self, epochs=100, X=X, y=y):
+    def train(self, X, y, epochs=100):
         """_summary_
 
         Args:
@@ -199,18 +175,11 @@ class MutiLayerPerceptron:
             LOSS.append(loss)
         return LOSS
 
-
-# %%
-mlp = MutiLayerPerceptron(X, [3, 2, 1])
-mlp.prove_synapses()
-
-# %%
-mlp.prove_neurons()
-
-# %%
-# train this thing
-
-# %%
-l = mlp.train(epochs=20)
-
-# %%
+    def predict(self, X_test: pd.DataFrame):
+        preds = []
+        for line in X_test.iterrows():
+            # init first layer:
+            for neuron_index, neuron in enumerate(self.NEURONS[0]):
+                neuron.value = line[1][neuron_index]
+            preds.append(self.forward())
+        return preds
