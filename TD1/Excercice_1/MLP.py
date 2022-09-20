@@ -6,14 +6,20 @@ from Abstract_Neuron import Abs_Neuron
 from Abstract_Synapse import Abs_Synapse
 from Neuron import Neuron, heavy
 from Synapse import Synapse
+from sklearn.metrics import accuracy_score
 
 
 class MutiLayerPerceptron:
-    """_summary_
+    """ 
+    This object instantiates an Multi Layer Perceptron implementation. 
+
+    A Multi Layer Perceptron is a fully connected, feed forward neural network.
     """
 
     def __init__(self, X: pd.DataFrame, layers: List) -> None:
-        """_summary_
+        """
+        A MLP accepts multiple layers. 
+        The first layer has X.shape[1] neurons. 
 
         Args:
             X (pd.DataFrame): _description_
@@ -29,7 +35,8 @@ class MutiLayerPerceptron:
             f"# SUMMARY : MultiLayerPercetron with architecture : {self.layers}")
 
     def create_neurons(self):
-        """_summary_
+        """
+        Create a List (layer) of Lists(neurons) that holds all the neurons. 
         """
         self.NEURONS: List[List[Abs_Neuron]] = []
         for index, n_neurons in enumerate(self.layers):
@@ -48,7 +55,8 @@ class MutiLayerPerceptron:
             self.NEURONS.append(neurons_in)
 
     def create_synapses(self):
-        """_summary_
+        """
+        Create a List (layer i to layer i+1) of Lists (synapses) that holds all the synapses. 
         """
         self.SYNAPSES: List[List[Abs_Synapse]] = []
         for index, out_layer in enumerate(self.NEURONS[slice(1, len(self.NEURONS))]):
@@ -76,7 +84,8 @@ class MutiLayerPerceptron:
             self.SYNAPSES.append(Synapses_li_to_li_plus_1)
 
     def prove_synapses(self):
-        """_summary_
+        """
+        Proves connections
         """
         for index, layer in enumerate(self.SYNAPSES):
             print("\n")
@@ -85,7 +94,8 @@ class MutiLayerPerceptron:
                 print(synapse)
 
     def prove_neurons(self) -> None:
-        """_summary_
+        """
+        Proves connections
         """
 
         print(
@@ -118,10 +128,11 @@ class MutiLayerPerceptron:
             ]
 
     def forward(self):
-        """_summary_
+        """
+        Makes a single forward pass
 
         Returns:
-            _type_: _description_
+            float: prediction
         """
         for layer in self.NEURONS[1:]:
             for node in layer:
@@ -130,25 +141,27 @@ class MutiLayerPerceptron:
         return self.NEURONS[-1][0].value
 
     def backward(self, update):
-        """_summary_
+        """
+        Updates the weights of all the synapses
 
         Args:
-            update (_type_): _description_
+            update (float): c-o in hebb' law
         """
         for layer in self.SYNAPSES:
             for synapse in layer:
                 synapse.backward(update)
 
-    def train(self, X, y, epochs=100):
-        """_summary_
+    def train(self, X, y, epochs=100, verbose: int = 2):
+        """ Train the NN a number of times.
+        Each train epoch is a forward and backward pass of all train instances.
 
         Args:
-            epochs (int, optional): _description_. Defaults to 100.
-            X (_type_, optional): _description_. Defaults to X.
-            y (_type_, optional): _description_. Defaults to y.
+            epochs (int, optional): nb of epochs. 
+            X (pd.DataFrame): Training data.
+            y (pd.DataFrame): Training targets. 
 
         Returns:
-            _type_: _description_
+            List[List[float]]: List of the losses per epoch
         """
         LOSS = []
 
@@ -160,22 +173,37 @@ class MutiLayerPerceptron:
                     neuron.value = line[1][neuron_index]
                 pred = self.forward()
                 to_update = y[line[0]] - pred
-                print(
-                    f"Epoch {epoch}. line : {line[0]} Pred : {pred}  Target : {y[line[0]]}")
+                if verbose > 1:
+                    print(
+                        f"Epoch {epoch}. line : {line[0]} Pred : {pred}  Target : {y[line[0]]}")
                 if to_update != 0:
                     self.backward(to_update)
                 loss.append(to_update)
 
             # print mean abs loss
             abs_loss = np.array(np.abs(loss)).mean()
-            print(f"Absolute Loss {abs_loss}")
-            print("\n")
-            if abs_loss == 0:
+            y_pred = self.predict(X)
+            acc = accuracy_score(y, y_pred)
+            if verbose > 0:
+                print(
+                    f"Epoch {epoch}. Absolute Loss {abs_loss}. Accuracy {acc}")
+            if verbose > 1:
+                print("\n")
+            if abs_loss == 0:  # kind of an early stop.
                 break
             LOSS.append(loss)
         return LOSS
 
     def predict(self, X_test: pd.DataFrame):
+        """
+        Makes a forward pass given the X_test inputs. 
+
+        Args:
+            X_test (pd.DataFrame): usually test data
+
+        Returns:
+            List[float]: prediction for every i row in X_test
+        """
         preds = []
         for line in X_test.iterrows():
             # init first layer:
